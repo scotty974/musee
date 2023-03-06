@@ -6,6 +6,33 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model user{
+  id Int @id @default(autoincrement())
+  Email String? 
+  Password String
+
+}
+
+model Artists{
+  id Int @id @default(autoincrement())
+  Name String
+  Born_Date DateTime
+  Dead_Date DateTime
+  Picture String
+  lien_Wiki String
+  Painting_id Int
+  Painting Painting @relation(fields: [Painting_id], references: [id])
+  
+}
+
+model Painting{
+  id Int @id @default(autoincrement())
+  Name String
+  Image_url String
+  Artists Artists[]
+
 }
