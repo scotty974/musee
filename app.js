@@ -1,6 +1,8 @@
 import express from "express";
 import login from '../MuseeBack/route/login.js'; 
 import register from './route/register.js'
+import subscription from './route/subscription.js'
+
 import cors from 'cors';
 import * as dotenv from 'dotenv'
 
@@ -15,7 +17,7 @@ const port = 3000
 
 app.use('/', register)
 app.use('/', login) 
- 
+app.use('/', subscription)
 
 
 
