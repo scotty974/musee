@@ -19,13 +19,23 @@ const auth = expressjwt({
     algorithms: ["HS256"],
   }); 
 
-  router.get('/subscription/:id', auth, async (req, res, next)=>{
-    const {id} = req.params
+  router.get('/subscription/:uuid', auth, async (req, res, next)=>{
+    const {uuid} = req.params
     try{
-        const data = await fetchAPI(getPainting(id), process.env.API_AUTH_TOKEN)
+        const data = await fetchAPI(getPainting(uuid), process.env.API_AUTH_TOKEN)
        console.log(data)
-        const AuteurObject = {"Name" : data[0].fieldOeuvreAuteurs[0].entity.fieldAuteurAuteur.name }
-        res.json(AuteurObject)
+        const AuteurObject = {
+        "Name" : data[0].fieldOeuvreAuteurs[0].entity.fieldAuteurAuteur.entity.name,
+        "Born_date" : data[0].fieldOeuvreAuteurs[0].entity.fieldAuteurAuteur.entity.fieldPipDateNaissance.processed,
+        "Dead_date" : data[0].fieldOeuvreAuteurs[0].entity.fieldAuteurAuteur.entity.fieldPipDateDeces.processed,
+      }
+      const PeintureObject = {
+        "Title" : data[0].title, 
+        "Picture" : data[0].fieldVisuels[0].entity.publicUrl
+      }
+        console.log(AuteurObject)
+        console.log(PeintureObject)
+        res.json(data)
     }catch(error){
         next(error)
     }
