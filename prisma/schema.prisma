@@ -20,17 +20,16 @@ model user{
 model Artists{
   id Int @id @default(autoincrement())
   Name String
-  Born_Date DateTime
-  Dead_Date DateTime
-  Picture String
-  lien_Wiki String
-  Painting_id Int
-  Painting Painting @relation(fields: [Painting_id], references: [id])
+  Born_Date String
+  Dead_Date String
+  Painting_id String
+  Painting Painting @relation(fields: [Painting_id], references: [uuId])
   
 }
 
 model Painting{
   id Int @id @default(autoincrement())
+  uuId String @unique
   Name String
   Image_url String
   Artists Artists[]

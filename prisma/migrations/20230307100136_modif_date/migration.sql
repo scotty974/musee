@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `Artists` MODIFY `Born_Date` VARCHAR(191) NOT NULL,
+    MODIFY `Dead_Date` VARCHAR(191) NOT NULL;

@@ -7,6 +7,7 @@ import createError from 'http-errors';
 import {fetchAPI} from '../js/fetchAPI.js'
 import { getPainting } from "../js/queries.js";
 import * as dotenv from 'dotenv'
+import { object } from "zod";
 
 dotenv.config()
 
@@ -19,28 +20,40 @@ const auth = expressjwt({
     algorithms: ["HS256"],
   }); 
 
-  router.get('/subscription/:uuid', auth, async (req, res, next)=>{
+  router.post('/subscription/:uuid', auth, async (req, res, next)=>{
     const {uuid} = req.params
     try{
         const data = await fetchAPI(getPainting(uuid), process.env.API_AUTH_TOKEN)
-       console.log(data)
-        const AuteurObject = {
-        "Name" : data[0].fieldOeuvreAuteurs[0].entity.fieldAuteurAuteur.entity.name,
-        "Born_date" : data[0].fieldOeuvreAuteurs[0].entity.fieldAuteurAuteur.entity.fieldPipDateNaissance.processed,
-        "Dead_date" : data[0].fieldOeuvreAuteurs[0].entity.fieldAuteurAuteur.entity.fieldPipDateDeces.processed,
-      }
-      const PeintureObject = {
-        "Title" : data[0].title, 
-        "Picture" : data[0].fieldVisuels[0].entity.publicUrl
-      }
-        console.log(AuteurObject)
-        console.log(PeintureObject)
-        res.json(data)
+      
+        const PeintureObject = await prisma.painting.create({
+        data:{
+          uuId :data[0].entityUuid,
+          Name : data[0].title, 
+          Image_url : data[0].fieldVisuels[0].entity.publicUrl
+        }
+        
+      })
+        const AuteurObject = await prisma.artists.create({
+        data:{
+        Name: data[0].fieldOeuvreAuteurs[0].entity.fieldAuteurAuteur.entity.name,
+        Born_Date : data[0].fieldOeuvreAuteurs[0].entity.fieldAuteurAuteur.entity.fieldPipDateNaissance.processed,
+        Dead_Date : data[0].fieldOeuvreAuteurs[0].entity.fieldAuteurAuteur.entity.fieldPipDateDeces.processed,
+        Painting : {connect : {uuId : data[0].entityUuid}}
+        
+        }
+        
+        
+      })
+      
+        res.json({message : "Projet de merde mais bien vu ca marche quand meme"})
+        
     }catch(error){
         next(error)
     }
     
   })
+
+  
 
 
   export default router
