@@ -160,5 +160,17 @@ router.get("/paints", async (req, res, next) => {
     next(error);
   }
 });
-
+router.get("/paints/:id", async (req, res, next) => {
+  const id = parseInt(req.params.id);
+  try {
+    const paints = await prisma.painting.findFirst({
+      where: {
+        id: id,
+      },
+    });
+    res.json(paints);
+  } catch (error) {
+    return res.status(404).json({ errors: error.issues });
+  }
+});
 export default router;
