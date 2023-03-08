@@ -113,38 +113,20 @@ router.get("/random", async (req, res, next) => {
 });
 
 router.get("/artists/:query/paints/random", async (req, res, next) => {
-  
   try {
     const searchQuery = req.params.query;
-    const games = await prisma.artists.findMany({
-      where:{
-        Name : searchQuery
+    const artists = await prisma.artists.findMany({
+      where: {
+        Name: { contains: searchQuery }
       },
-      include:{
+      include: {
         Painting: true,
       }
     });
-    let closestMatch = null;
-    let closestDistance = Infinity;
-    games.forEach((game) => {
-      const distance = natural.LevenshteinDistance(
-        unidecode(game.Name.toLowerCase()),
-        unidecode(searchQuery.toLowerCase())
-      );
-      if (distance < closestDistance) {
-        closestMatch = game;
-        closestDistance = distance;
-      }
-    });
-    if (closestMatch) {
-      if (closestDistance > 2) {
-        res.status(404).json({ message: "Artist non trouvé" });
-      } else {
-        res.json(closestMatch);
-      }
-    } else {
-      res.status(404).json({ message: "Artist non trouvé" });
-    }
+    const paintings = artists.flatMap(artist => artist.Painting);
+    const randomIndex = Math.floor(Math.random() * paintings.length);
+    const randomPainting = paintings[randomIndex];
+    res.json(randomPainting);
   } catch (error) {
     return res.status(400).json({ errors: error.issues });
   }
