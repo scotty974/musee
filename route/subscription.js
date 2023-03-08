@@ -26,6 +26,7 @@ const auth = expressjwt({
         const data = await fetchAPI(getPainting(uuid), process.env.API_AUTH_TOKEN)
       
         const PeintureObject = await prisma.painting.create({
+         
         data:{
           uuId :data[0].entityUuid,
           Name : data[0].title, 
@@ -33,19 +34,23 @@ const auth = expressjwt({
         }
         
       })
+        let authorName  = data[0].fieldOeuvreAuteurs[0].entity.fieldAuteurAuteur.entity.name
+        const strName = authorName.split(', ')
+        authorName = strName[1] + " " + strName[0]
         const AuteurObject = await prisma.artists.create({
+          
         data:{
-        Name: data[0].fieldOeuvreAuteurs[0].entity.fieldAuteurAuteur.entity.name,
+        Name : authorName,
         Born_Date : data[0].fieldOeuvreAuteurs[0].entity.fieldAuteurAuteur.entity.fieldPipDateNaissance.processed,
         Dead_Date : data[0].fieldOeuvreAuteurs[0].entity.fieldAuteurAuteur.entity.fieldPipDateDeces.processed,
-        Painting : {connect : {uuId : data[0].entityUuid}}
+        Painting : {connect:{uuId :data[0].entityUuid}}
         
         }
         
         
       })
-      
-        res.json({message : "Projet de merde mais bien vu ca marche quand meme"})
+      console.log(authorName)
+        res.json({message : "Data sended"})
         
     }catch(error){
         next(error)
@@ -53,7 +58,87 @@ const auth = expressjwt({
     
   })
 
-  
+
+  router.get('/artists', async (req,res,next)=>{
+    try {
+      const games = await prisma.artists.findMany({
+         
+        
+      });
+      res.json(games);
+    } catch (error) {
+      return res.status(400).json({ errors: error.issues });
+    }
+   
+  })
+
+  router.get('/artists/:id', async (req,res,next)=>{
+    const id = parseInt(req.params.id)
+    try {
+     
+      const games = await prisma.artists.findFirst({
+        where:{
+          id : id
+        }
+      });
+      res.json(games);
+    } catch (error) {
+      return res.status(404).json({ errors: error.issues });
+    }
+   
+  })
+  router.get('/artists/:id/paints', async (req,res,next)=>{
+    const id = parseInt(req.params.id)
+    try {
+     
+      const games = await prisma.artists.findFirst({
+        where:{
+          id : id
+        },
+        include:{
+          Painting : true
+        }
+      });
+      res.json(games);
+    } catch (error) {
+      return res.status(404).json({ errors: error.issues });
+    }
+   
+  })
+ 
+  router.get('/random', async (req, res, next)=>{
+    try{
+      
+      const game = await prisma.artists.findMany({
+        skip :5, 
+        take:4, 
+        orderBy:{
+          id : "asc"
+        }
+      })
+      res.json(game);
+    }catch(error){
+      next(error)
+    }
+  })
+  router.get('/artists/:id/paints/random', async (req, res, next)=>{
+     const id = parseInt(req.params.id)
+    try {
+     
+      const artists = await prisma.artists.findMany({
+        take:1,
+        where:{
+          id : id
+        },
+        include:{
+          Painting : true
+        }
+      });
+      res.json(artists);
+    } catch (error) {
+      return res.status(404).json({ errors: error.issues });
+    }
+  })
 
 
   export default router

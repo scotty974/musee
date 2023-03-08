@@ -20,8 +20,8 @@ model user{
 model Artists{
   id Int @id @default(autoincrement())
   Name String
-  Born_Date String
-  Dead_Date String
+  Born_Date String?
+  Dead_Date String?
   Painting_id String
   Painting Painting @relation(fields: [Painting_id], references: [uuId])
   
