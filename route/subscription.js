@@ -123,7 +123,7 @@ router.get("/artists/:query/paints/random", async (req, res, next) => {
         Painting: true,
       }
     });
-    const paintings = artists.flatMap(artist => artist.Painting);
+    const paintings = artists.map(artist => artist.Painting);
     const randomIndex = Math.floor(Math.random() * paintings.length);
     const randomPainting = paintings[randomIndex];
     res.json(randomPainting);
